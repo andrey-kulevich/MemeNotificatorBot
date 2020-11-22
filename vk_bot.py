@@ -17,7 +17,7 @@ class VkBot:
         return user_name.split()[0]
 
     def new_message(self, message):
-        DbHandler.add_user(self._USER_ID, self._USERNAME)
+        # DbHandler.add_user(self._USER_ID, self._USERNAME)
 
         if message.upper() == self._COMMANDS[0]:
             return f"Привет-привет, {self._USERNAME}!"
