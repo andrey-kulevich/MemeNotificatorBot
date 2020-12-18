@@ -27,12 +27,11 @@ class DbHandler:
     def add_user(user_id, username):
         conn = DbHandler.connect()
         cursor = conn.cursor()
-        sql = "SELECT * FROM users;"
-        cursor.execute(sql)
-        result = cursor.fetchall()
-        if len(result) == 0:
-            sql = "INSERT INTO users (id, name) VALUES ('%s', '%s');" % (str(user_id), username)
+        sql = "INSERT INTO users (id, name) VALUES ('%s', '%s');" % (str(user_id), username)
+        try:
             cursor.execute(sql)
+        except mysql.connector.errors.IntegrityError:
+            pass
         conn.close()
 
     @staticmethod
@@ -54,12 +53,24 @@ class DbHandler:
         conn.close()
 
     @staticmethod
-    def get_notes_by_user_id(user_id):
+    def get_notes_by_user_id(user_id, date="all"):
         conn = DbHandler.connect()
         cursor = conn.cursor()
-        sql = "SELECT * FROM notes WHERE user = '%d';" % user_id
+        if date == "all":
+            sql = "SELECT * FROM notes WHERE user = '%d';" % user_id
+        else:
+            sql = "SELECT * FROM notes " \
+                  "WHERE user = '%d' AND notification_date " \
+                  "BETWEEN '%s 00:00:00' AND '%s 23:59:59';" % (user_id, date, date)
         cursor.execute(sql)
         result = cursor.fetchall()
         conn.close()
-        return result
-
+        str1 = ""
+        if len(result) > 0:
+            for item in result:
+                str1 = str1 + ("Дата напоминания: " + str(item[1]) + "\n" +
+                               " Частота напоминания: " + str(item[2]) + "\n" +
+                               " Содержимое: " + str(item[3]) + "\n\n")
+        else:
+            str1 = "У вас еще нет напоминаний, создайте новое!"
+        return str1
