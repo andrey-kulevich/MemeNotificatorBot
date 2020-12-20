@@ -1,4 +1,5 @@
 import mysql.connector
+import datetime
 
 
 class DbHandler:
@@ -53,6 +54,14 @@ class DbHandler:
         conn.close()
 
     @staticmethod
+    def delete_note(note_id):
+        conn = DbHandler.connect()
+        cursor = conn.cursor()
+        sql = "DELETE FROM notes WHERE id = '%d';" % note_id
+        cursor.execute(sql)
+        conn.close()
+
+    @staticmethod
     def get_notes_by_user_id(user_id, date="all"):
         conn = DbHandler.connect()
         cursor = conn.cursor()
@@ -69,8 +78,18 @@ class DbHandler:
         if len(result) > 0:
             for item in result:
                 str1 = str1 + ("Дата напоминания: " + str(item[1]) + "\n" +
-                               " Частота напоминания: " + str(item[2]) + "\n" +
-                               " Содержимое: " + str(item[3]) + "\n\n")
+                               "Содержимое: " + str(item[3]) + "\n\n")
         else:
             str1 = "У вас еще нет напоминаний, создайте новое!"
         return str1
+
+    @staticmethod
+    def get_note_by_current_time():
+        conn = DbHandler.connect()
+        cursor = conn.cursor()
+        sql = "SELECT * FROM notes WHERE notification_date = '%s';" \
+              % datetime.datetime.now().replace(microsecond=0)
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        conn.close()
+        return result
