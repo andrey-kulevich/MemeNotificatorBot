@@ -11,10 +11,6 @@ vk = vk_api.VkApi(token=token)
 long_poll = VkLongPoll(vk)
 
 
-def write_message(user_id, message):
-    vk.method('messages.send', {'user_id': user_id, 'message': message, 'random_id': random.getrandbits(64)})
-
-
 class CheckNotes(Thread):
     def __init__(self):
         Thread.__init__(self)
@@ -29,7 +25,9 @@ class CheckNotes(Thread):
                     text = ""
                     text = text + ("Дата напоминания: " + str(item[1]) + "\n" +
                                    "Содержимое: " + str(item[3]) + "\n\n")
-                    write_message(item[4], text)
+                    vk.method('messages.send', {'user_id': item[4],
+                                                'message': text,
+                                                'random_id': random.getrandbits(64)})
                     DbHandler.delete_note(item[0])
             time.sleep(0.01)
 
@@ -44,8 +42,8 @@ class CheckMessages(Thread):
         for event in long_poll.listen():
             if event.type == VkEventType.MESSAGE_NEW:
                 if event.to_me:
-                    bot = VkBot(event.user_id)
-                    write_message(event.user_id, bot.new_message(event.text))
+                    bot = VkBot(event.user_id, vk)
+                    bot.new_message(event.text)
 
 
 CheckNotes()

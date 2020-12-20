@@ -93,3 +93,13 @@ class DbHandler:
         result = cursor.fetchall()
         conn.close()
         return result
+
+    @staticmethod
+    def get_random_image():
+        conn = DbHandler.connect()
+        cursor = conn.cursor()
+        sql = "SELECT url FROM images ORDER BY RAND() LIMIT 1;"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        conn.close()
+        return result
